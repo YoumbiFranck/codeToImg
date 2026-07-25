@@ -1,0 +1,8 @@
+.git
+.git-backup
+.DS_Store
+node_modules
+server/node_modules
+npm-debug.log*
+server/npm-debug.log*
+test-output
