@@ -125,6 +125,12 @@ Request body:
   highlighting. When omitted or unknown, the language is detected
   automatically.
 
+Before rendering, code is automatically formatted with Prettier for supported
+languages: JavaScript, JSX, TypeScript, TSX, JSON, JSON5, HTML, Angular, CSS,
+SCSS, Less, Markdown, MDX, YAML, GraphQL, and Vue. Unsupported languages and
+invalid code are rendered unchanged instead of causing image generation to
+fail.
+
 ### `POST /generate-image`
 
 Generates an image from the provided code snippet and customization options.
@@ -176,5 +182,4 @@ Here is an example of a request and the resulting image:
     "descriptionPadding": "0 0 20px"
 }
 ```
-
 

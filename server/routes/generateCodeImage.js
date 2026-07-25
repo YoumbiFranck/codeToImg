@@ -1,9 +1,59 @@
 const express = require("express");
 const hljs = require("highlight.js");
+const prettier = require("prettier");
 const puppeteer = require("puppeteer");
 const generateCodeOnlyHtmlTemplate = require("../templates/codeOnlyHtmlTemplate");
 
 const router = express.Router();
+
+const prettierParsers = {
+  angular: "angular",
+  css: "css",
+  graphql: "graphql",
+  html: "html",
+  javascript: "babel",
+  js: "babel",
+  jsx: "babel",
+  json: "json",
+  json5: "json5",
+  jsonc: "json-stringify",
+  less: "less",
+  markdown: "markdown",
+  md: "markdown",
+  mdx: "mdx",
+  scss: "scss",
+  typescript: "typescript",
+  ts: "typescript",
+  tsx: "typescript",
+  vue: "vue",
+  yaml: "yaml",
+  yml: "yaml",
+};
+
+const formatCode = async (code, language) => {
+  const normalizedLanguage =
+    typeof language === "string" ? language.toLowerCase() : "";
+  const parser = prettierParsers[normalizedLanguage];
+
+  if (!parser) {
+    return code;
+  }
+
+  try {
+    return await prettier.format(code, {
+      parser,
+      printWidth: 48,
+      tabWidth: 2,
+      useTabs: false,
+    });
+  } catch (error) {
+    console.warn(
+      `Could not format code as ${normalizedLanguage}; using the original code.`,
+      error.message
+    );
+    return code;
+  }
+};
 
 router.post("/generate-code-image", async (req, res) => {
   const { code, language } = req.body;
@@ -15,10 +65,11 @@ router.post("/generate-code-image", async (req, res) => {
   let browser;
 
   try {
+    const formattedCode = await formatCode(code, language);
     const highlightedCode =
       language && hljs.getLanguage(language)
-        ? hljs.highlight(code, { language }).value
-        : hljs.highlightAuto(code).value;
+        ? hljs.highlight(formattedCode, { language }).value
+        : hljs.highlightAuto(formattedCode).value;
 
     const htmlContent = generateCodeOnlyHtmlTemplate(highlightedCode);
     const launchArgs =
